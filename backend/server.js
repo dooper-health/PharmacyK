@@ -168,6 +168,7 @@ import viewprofileRoutes from './routes/viewprofileRoutes.js';
 import withdrawvaccineRoutes from './routes/withdrawvaccineRoutes.js';
 import earningvaccineRoutes from './routes/earningvaccineRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import firebaseOtpRoutes from './routes/firebaseOtpRoutes.js';
 import createUser from './models/User.js';
 
 const app = express();
@@ -196,7 +197,7 @@ connectDB().then(({ conn1, conn2 }) => {
   app.use('/api/otp', otpRoutes);
   app.use('/api/user', userRoutes);
   app.use('/api/timer', timerRoutes);
-  app.use('/api/booking', bookingRoutes);
+  app.use('/api/booking', bookingRoutes); ////UrgentBookings
   app.use('/api/booking2', bookingRoutes2);
   app.use('/api/earningmedicine', earningRoutes);
   app.use('/api/withdrawmedicine', withdrawRoutes);
@@ -209,6 +210,7 @@ connectDB().then(({ conn1, conn2 }) => {
   app.use('/api/dosage', dosageRoutes);
   app.use('/api/alerts', alertRoutes);
   app.use('/api/notifications', notificationRoutes);
+  app.use('/api/firebase-otp', firebaseOtpRoutes);
   app.use('/api/bookingservice', bookingserviceRoutes);
   app.use('/api/bookingservice2', bookingserviceRoutes2);
   app.use('/api/earning2', earningRoutes2);

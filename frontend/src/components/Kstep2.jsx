@@ -1,18 +1,37 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Step2image from '../assets/Step-2-of-3.svg';
-import { useAvailabilityContext } from '../AvailabilityContext';
+import { useSession } from '../context/SessionContext.jsx';
 
 const Kstep2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { mobileNumber: contextMobileNumber } = useAvailabilityContext();
+  const { mobileNumber: sessionMobileNumber, updateSignupProgress } = useSession();
   const { mobileNumber: stateMobileNumber } = location.state || {};
   
-  // Use state mobile number if available, otherwise fall back to context
-  const mobileNumber = stateMobileNumber || contextMobileNumber;
+  // Use state mobile number if available, otherwise fall back to session context
+  const mobileNumber = stateMobileNumber || sessionMobileNumber;
+
+  // Check if user should be on this step
+  useEffect(() => {
+    const checkUserProgress = async () => {
+      const currentMobile = mobileNumber;
+      if (!currentMobile) {
+        navigate('/signup');
+        return;
+      }
+      
+      // If user has completed signup, redirect to dashboard
+      if (currentMobile && localStorage.getItem('signupCompleted') === 'true') {
+        navigate('/dashboarddark');
+        return;
+      }
+    };
+
+    checkUserProgress();
+  }, [mobileNumber, navigate]);
   
   // Function to normalize mobile number format (same as backend)
   const normalizeMobileNumber = (mobile) => {
@@ -104,6 +123,10 @@ const Kstep2 = () => {
         },
       });
       console.log('Data submitted successfully:', response.data);
+      
+      // Update session progress
+      await updateSignupProgress(2, false);
+      
       navigate('/Kstep3', { state: { mobileNumber: normalizedMobileNumber } });
     } catch (error) {
       console.error('Error submitting data:', error);

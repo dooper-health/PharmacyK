@@ -182,21 +182,21 @@
 
 
 //modified
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Step1image from '../assets/Step-1-of-3.svg';
-import { useAvailabilityContext } from '../AvailabilityContext';
+import { useSession } from '../context/SessionContext.jsx';
 import MobileNumberDebug from './MobileNumberDebug';
 
 
 const Kstep1 = () => {
   const navigate = useNavigate();
-  const { mobileNumber } = useAvailabilityContext();
+  const { mobileNumber, updateSignupProgress } = useSession();
   
   // Debug logging
-  console.log('Kstep1 - mobileNumber from context:', mobileNumber);
+  console.log('Kstep1 - mobileNumber from session context:', mobileNumber);
   
   // Fallback to localStorage if context is empty
   const getMobileNumber = () => {
@@ -205,6 +205,25 @@ const Kstep1 = () => {
     console.log('Kstep1 - mobileNumber from localStorage:', storedMobile);
     return storedMobile;
   };
+
+  // Check if user should be on this step
+  useEffect(() => {
+    const checkUserProgress = async () => {
+      const currentMobile = getMobileNumber();
+      if (!currentMobile) {
+        navigate('/signup');
+        return;
+      }
+      
+      // If user has completed signup, redirect to dashboard
+      if (mobileNumber && localStorage.getItem('signupCompleted') === 'true') {
+        navigate('/dashboarddark');
+        return;
+      }
+    };
+
+    checkUserProgress();
+  }, [mobileNumber, navigate]);
   
   // Function to normalize mobile number format
   const normalizeMobileNumber = (mobile) => {
@@ -325,6 +344,9 @@ const Kstep1 = () => {
       
       // Store the normalized mobile number in localStorage for consistency
       localStorage.setItem('mobileNumber', normalizedMobileNumber);
+      
+      // Update session progress
+      await updateSignupProgress(1, false);
       
       navigate('/Kstep2', { state: { mobileNumber: normalizedMobileNumber } });
     } catch (error) {

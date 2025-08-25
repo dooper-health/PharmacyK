@@ -178,7 +178,7 @@ const BookingCard = ({ booking, profileData, onAccept, onReject, labownermobile 
     </div>
     <div className="py-[13px] px-[16px] h-[56px]">
       <button
-        onClick={() => onAccept(labownermobile, booking.labId)} 
+        onClick={() => onAccept(labownermobile, booking.labId, booking.bookingId, booking.pharmacyId)} 
         className="inline-block text-white text-center font-Montserrat text-[12px] font-semibold bg-[#E40443] px-[24px] w-[168px] py-[6px] rounded-lg"
       >
         Accept
@@ -234,10 +234,15 @@ const BookingsList = () => {
   }, [bookings]);
 
   // Accept booking handler
-  const handleAccept = async (labownermobile, labId) => {
+  const handleAccept = async (labownermobile, labId, bookingId, pharmacyId) => {
     try {
       await axios.post('/api/sd/acceptvaccine', { labownermobile, labId });
-      navigate('/pending'); // Refresh the page
+      // Notify PWA about the accepted booking
+      await axios.post('/api/notifications/vaccination-to-pwa', {
+        bookingId,
+        pharmacyId
+      });
+      navigate('/pending'); // Refresh the page or go to pending
     } catch (error) {
       console.error('Error accepting booking:', error);
     }

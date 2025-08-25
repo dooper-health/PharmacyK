@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Selector from './Selector';
 import Footermobile from './Footermobile';
-import { useAvailabilityContext } from '../AvailabilityContext';
+import { useSession } from '../context/SessionContext.jsx';
 import editimage from "../assets/photo.png";
 import icon from "../assets/icon.png";
 import arrowicon from "../assets/ic (3).png";
@@ -22,7 +22,7 @@ import { Link } from 'react-router-dom';
 
 
 const MyProfile = () => {
-  const { mobileNumber, setMobileNumber } = useAvailabilityContext();
+  const { mobileNumber, logout } = useSession();
   const [fullName, setFullName] = useState('');
   const [earningsData2, setEarningsData2] = useState({ availableBalance: 0 });
   const navigate = useNavigate();
@@ -69,12 +69,11 @@ const MyProfile = () => {
 
   const handleLogout = async () => {
     try {
-
+      await logout();
       console.log('Logout successful'); 
-      setMobileNumber('');
       navigate('/');
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error during logout:', error);
     }
   };
 

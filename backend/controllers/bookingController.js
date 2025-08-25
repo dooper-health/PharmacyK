@@ -142,7 +142,7 @@ export const acceptBooking = async (req, res) => {
     }
 
     const booking = userBookings.bookings.id(id);
-    booking.status = 'Pending';
+    booking.status = 'pending';
 
     await userBookings.save();
 

@@ -13,23 +13,37 @@ class FirebaseOtpService {
     // Initialize Firebase Admin if not already done
     if (!admin.apps.length) {
       try {
+        // Check if required environment variables are set
+        if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_PRIVATE_KEY || !process.env.FIREBASE_CLIENT_EMAIL) {
+          console.warn('Firebase environment variables not properly configured. Firebase OTP features will not work.');
+          console.warn('Please set the following environment variables:');
+          console.warn('- FIREBASE_PROJECT_ID');
+          console.warn('- FIREBASE_PRIVATE_KEY');
+          console.warn('- FIREBASE_CLIENT_EMAIL');
+          console.warn('- FIREBASE_PRIVATE_KEY_ID');
+          console.warn('- FIREBASE_CLIENT_ID');
+          return;
+        }
+
         // For development, you can use environment variables
         const serviceAccount = {
-          type: process.env.FIREBASE_TYPE,
+          type: process.env.FIREBASE_TYPE || 'service_account',
           project_id: process.env.FIREBASE_PROJECT_ID,
           private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
           private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
           client_email: process.env.FIREBASE_CLIENT_EMAIL,
           client_id: process.env.FIREBASE_CLIENT_ID,
-          auth_uri: process.env.FIREBASE_AUTH_URI,
-          token_uri: process.env.FIREBASE_TOKEN_URI,
-          auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+          auth_uri: process.env.FIREBASE_AUTH_URI || 'https://accounts.google.com/o/oauth2/auth',
+          token_uri: process.env.FIREBASE_TOKEN_URI || 'https://oauth2.googleapis.com/token',
+          auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL || 'https://www.googleapis.com/oauth2/v1/certs',
           client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL
         };
 
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount)
         });
+        
+        console.log('Firebase Admin SDK initialized successfully');
       } catch (error) {
         console.error('Firebase Admin initialization error:', error);
       }
@@ -39,6 +53,14 @@ class FirebaseOtpService {
   // Verify Firebase ID token
   async verifyIdToken(idToken) {
     try {
+      // Check if Firebase Admin is initialized
+      if (!admin.apps.length) {
+        return {
+          success: false,
+          error: 'Firebase Admin SDK not initialized. Please check environment variables.'
+        };
+      }
+
       const decodedToken = await admin.auth().verifyIdToken(idToken);
       return {
         success: true,
@@ -190,6 +212,14 @@ class FirebaseOtpService {
   // Generate session cookie for persistent verification
   async createSessionCookie(idToken, expiresIn = 60 * 60 * 24 * 5 * 1000) { // 5 days
     try {
+      // Check if Firebase Admin is initialized
+      if (!admin.apps.length) {
+        return {
+          success: false,
+          error: 'Firebase Admin SDK not initialized. Please check environment variables.'
+        };
+      }
+
       const sessionCookie = await admin.auth().createSessionCookie(idToken, {
         expiresIn
       });

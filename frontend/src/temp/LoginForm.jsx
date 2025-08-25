@@ -169,7 +169,7 @@ import axios from "axios";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useAvailabilityContext } from "../AvailabilityContext.jsx";
+import { useSession } from "../context/SessionContext.jsx";
 import SecondaryButton from "../temp/SecondaryButton";
 
 function LoginForm() {
@@ -180,7 +180,7 @@ function LoginForm() {
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { sendOTP, verifyOTP } = useAuth();
-  const { setMobileNumber } = useAvailabilityContext();
+  const { checkActiveSession, createSession, getSignupProgress, getRedirectPath } = useSession();
   const navigate = useNavigate();
 
   const getOtp = async (e) => {
@@ -226,7 +226,15 @@ function LoginForm() {
       } else {
         phoneNumber = number.startsWith("+") ? number : `+${number}`;
       }
-      setMobileNumber(phoneNumber);
+
+      // Check if user has active session
+      const activeSession = await checkActiveSession(phoneNumber);
+      if (activeSession) {
+        // User has active session, redirect to appropriate page
+        const redirectPath = getRedirectPath();
+        navigate(redirectPath);
+        return;
+      }
 
       // check user existence
       const res = await axios.post("/api/auth/login/checkuserexistance2", {
@@ -234,7 +242,28 @@ function LoginForm() {
       });
 
       if (res.data.message === "Login successful") {
-        navigate("/success-login");
+        // Create session for existing user
+        if (res.data.user) {
+          await createSession(phoneNumber, res.data.user._id);
+        }
+        
+        // Check signup progress and redirect accordingly
+        const progress = await getSignupProgress(phoneNumber);
+        if (progress && progress.signupCompleted) {
+          // User has completed signup, go directly to dashboard
+          navigate("/dashboarddark");
+        } else if (progress && progress.signupStep > 0) {
+          // User has incomplete signup, redirect to appropriate step
+          const redirectPath = getRedirectPath();
+          navigate(redirectPath);
+        } else {
+          // New user or user without signup progress, go to success page
+          // But first ensure they have a session
+          if (res.data.user) {
+            await createSession(phoneNumber, res.data.user._id);
+          }
+          navigate("/success-login", { state: { mobileNumber: phoneNumber } });
+        }
       } else {
         navigate("/signup");
       }

@@ -15,6 +15,7 @@ app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/otp', require("./routes/otpRoutes"));
 app.use('/api/firebase-otp', require("./routes/firebaseOtpRoutes"));
+app.use('/api/session', require('./routes/sessionRoutes'));
 
 app.use(require('./middlewares/errorHandler'));
 

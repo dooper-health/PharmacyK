@@ -5,12 +5,14 @@ import {
 } from "react-router-dom";
 
 import { AvailabilityProvider, useAvailabilityContext } from './AvailabilityContext';
+import { SessionProvider } from './context/SessionContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 import Login from "./pages/Login";
 import SignupStep1 from './components/SignupStep1';
 import Verify from "./temp/Verify";
 import ApiTest from './components/ApiTest';
+import SessionTest from './components/SessionTest';
 import Successful from "./temp/Successful";
 import Successignup from "./temp/SuccessfulSignup";
 import ProfileUnderReview from "./temp/ProfileUnderReview";
@@ -122,6 +124,7 @@ function App() {
         { path: "Kstep2", element: <Kstep2 /> },
         { path: "Kstep3", element: <Kstep3 /> },
         { path: "api-test", element: <ApiTest /> },
+        { path: "session-test", element: <SessionTest /> },
       ],
     },
     {
@@ -446,9 +449,11 @@ function App() {
   ]);
 
   return (
-    <AvailabilityProvider>
-      <RouterProvider router={routes} />
-    </AvailabilityProvider>
+    <SessionProvider>
+      <AvailabilityProvider>
+        <RouterProvider router={routes} />
+      </AvailabilityProvider>
+    </SessionProvider>
   );
 }
 

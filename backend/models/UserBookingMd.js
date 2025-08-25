@@ -13,8 +13,8 @@ const bookingSchema = new mongoose.Schema({
   charges: Number,
   status: {
     type: String,
-    enum: ['Pending', 'Completed', 'Reject','Read', 'Incoming'],
-    default: 'Incoming'
+    enum: ['pending', 'completed', 'reject','read', 'incoming'],
+    default: 'incoming'
   }
 });
 

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import SecondaryButton from '../temp/SecondaryButton.jsx';
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useAvailabilityContext } from "../AvailabilityContext.jsx";
+import { useSession } from "../context/SessionContext.jsx";
 
 const SignupStep1 = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -16,8 +16,30 @@ const SignupStep1 = () => {
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { sendOTP, verifyOTP } = useAuth();
-  const { setMobileNumber } = useAvailabilityContext();
+  const { 
+    checkActiveSession, 
+    createSession, 
+    getSignupProgress, 
+    getRedirectPath 
+  } = useSession();
   const navigate = useNavigate();
+
+  // Check for existing session on component mount
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      if (number) {
+        const activeSession = await checkActiveSession(number);
+        if (activeSession) {
+          const redirectPath = getRedirectPath();
+          navigate(redirectPath);
+        }
+      }
+    };
+
+    if (number) {
+      checkExistingSession();
+    }
+  }, [number, checkActiveSession, getRedirectPath, navigate]);
 
   const getOtp = async (e) => {
     e.preventDefault();
@@ -73,28 +95,51 @@ const SignupStep1 = () => {
       let phoneNumber;
       if (verificationResult && verificationResult.user && verificationResult.user.phoneNumber) {
         phoneNumber = verificationResult.user.phoneNumber;
-        setMobileNumber(phoneNumber);
-        console.log('Mobile number set in context:', phoneNumber);
+        console.log('Mobile number from verification:', phoneNumber);
       } else {
         // Fallback to the number from the form
         phoneNumber = number.startsWith('+') ? number : `+${number}`;
-        setMobileNumber(phoneNumber);
-        console.log('Mobile number set in context (fallback):', phoneNumber);
+        console.log('Mobile number from form (fallback):', phoneNumber);
       }
       
-      // Create user in backend database
+      // Create user in backend database and session
       try {
         // Use the normalized phone number format
         const response = await axios.post('/api/auth/signup/checkuserexistance', {
           phoneNumber: phoneNumber
         });
         console.log('Backend user creation response:', response.data);
+        
+        // If user exists and has active session, redirect to appropriate page
+        if (response.data.userExists && response.data.hasActiveSession) {
+          // Session will be handled by the session context
+          const redirectPath = getRedirectPath();
+          navigate(redirectPath);
+          return;
+        }
+        
+        // Create session for new user or user without active session
+        if (response.data.user) {
+          await createSession(phoneNumber, response.data.user._id);
+        }
+        
+        // Check signup progress and redirect accordingly
+        const progress = await getSignupProgress(phoneNumber);
+        if (progress && progress.signupCompleted) {
+          navigate("/dashboarddark");
+        } else if (progress && progress.signupStep > 0) {
+          // User has incomplete signup, redirect to appropriate step
+          const redirectPath = getRedirectPath();
+          navigate(redirectPath);
+        } else {
+          // New user - go to first signup step
+          navigate("/Kstep1");
+        }
       } catch (backendError) {
         console.error('Error creating user in backend:', backendError);
         // Don't block the signup process if backend user creation fails
+        navigate("/Kstep1");
       }
-      
-      navigate("/success-signup");
     } catch (err) {
       console.error("Verification Error:", err);
       setError(err.message || "Invalid OTP. Please try again.");

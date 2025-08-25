@@ -1,16 +1,36 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Step3image from '../assets/Step-3-of-3.svg';
-import { useAvailabilityContext } from '../AvailabilityContext';
+import { useSession } from '../context/SessionContext.jsx';
 
 const Kstep3 = () => {
   const location = useLocation();
-  const { mobileNumber: contextMobileNumber } = useAvailabilityContext();
+  const navigate = useNavigate();
+  const { mobileNumber: sessionMobileNumber, updateSignupProgress } = useSession();
   const { mobileNumber: stateMobileNumber } = location.state || {};
   
-  // Use state mobile number if available, otherwise fall back to context
-  const mobileNumber = stateMobileNumber || contextMobileNumber;
+  // Use state mobile number if available, otherwise fall back to session context
+  const mobileNumber = stateMobileNumber || sessionMobileNumber;
+
+  // Check if user should be on this step
+  useEffect(() => {
+    const checkUserProgress = async () => {
+      const currentMobile = mobileNumber;
+      if (!currentMobile) {
+        navigate('/signup');
+        return;
+      }
+      
+      // If user has completed signup, redirect to dashboard
+      if (currentMobile && localStorage.getItem('signupCompleted') === 'true') {
+        navigate('/dashboarddark');
+        return;
+      }
+    };
+
+    checkUserProgress();
+  }, [mobileNumber, navigate]);
   
   // Function to normalize mobile number format (same as backend)
   const normalizeMobileNumber = (mobile) => {
@@ -50,8 +70,6 @@ const Kstep3 = () => {
   const fileInputRefs = {
     uploadbankstatement: useRef(null),
   };
-
-  const navigate = useNavigate();
 
   const handleFileChange = (e, field) => {
     setFiles((prevFiles) => ({
@@ -113,7 +131,11 @@ const Kstep3 = () => {
         },
       });
       console.log('File uploaded successfully:', response.data);
-      navigate('/profileunderreview', { state: { mobileNumber: normalizedMobileNumber } }); 
+      
+      // Update session progress to completed
+      await updateSignupProgress(3, true);
+      
+      navigate('/success-signup', { state: { mobileNumber: normalizedMobileNumber } }); 
     } catch (error) {
       console.error('Error uploading file:', error);
       
