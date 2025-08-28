@@ -12,7 +12,7 @@ const SuccessCard10 = () => {
     <h1 className='flex items-center justify-center mt-[40px] font-Montserrat text-[20px] font-[700] '>Successful</h1>
     <h2 className='flex items-center justify-center mt-[7px] font-Montserrat text-[14px] font-[500] '>OPT Is verified successfully123</h2>
     
-    <Link to={`/completed`} className='mt-[40px] flex items-center cursor-pointer justify-center font-Montserrat text-[14px] font-[500] text-[#8D98A4]'>Later</Link>
+    <Link to={`/pending`} className='mt-[40px] flex items-center cursor-pointer justify-center font-Montserrat text-[14px] font-[500] text-[#8D98A4]'>Later</Link>
 
     </div>
     </div>

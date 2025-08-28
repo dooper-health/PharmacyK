@@ -172,7 +172,7 @@ const BookingCard = ({ booking, profileData, onAccept, onReject, labownermobile 
           {/* Age: {profileData?.age} | Gender: {profileData?.gender} */}
         </div>
         <div className="text-[12px] font-[500] text-[#5B6572]">
-          {profileData?.addressLine1}, {profileData?.city}, {profileData?.state}
+            {profileData?.addressLine1}, {profileData?.city}, {profileData?.state}
         </div>
       </div>
     </div>

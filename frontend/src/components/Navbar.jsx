@@ -118,11 +118,11 @@ const Navbar = () => {
            <Link to="/incoming">
             <li className='hidden xl:block'>Home</li></Link>
            <Link to="/pending">
-            <li className='hidden xl:block'>Accepted</li></Link>
-           <Link to="/cancelled">
-            <li className='hidden xl:block'>Rejected</li></Link>
-           <Link to="/completed">
-            <li className='hidden xl:block'>Completed</li></Link>
+            <li className='hidden xl:block'>My Booking</li></Link>
+           {/* <Link to="/cancelled">
+            <li className='hidden xl:block'>Rejected</li></Link> */}
+           {/* <Link to="/completed">
+            <li className='hidden xl:block'>Completed</li></Link> */}
            <Link to="/earningmedicine">
             <li className='hidden xl:block'>Medicine Earnings </li></Link>
            <Link to="/earningvaccine">

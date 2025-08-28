@@ -59,7 +59,7 @@ const Incoming = ({Pending}) => {
             className={`px-4 mt-4 cursor-pointer ${selectedItem === 'Urgent' ? ' border-b pb-[8px] text-[#E40443] border-[#E40443]' : ''}`}
             onClick={() => handleItemClick('Urgent')}
           >
-            Medicine
+            Accepted
           </div>
           {/* <li
             className={`px-4 cursor-pointer ${selectedItem === 'Non-Urgent' ? 'border-b pb-[8px] text-[#E40443] border-[#E40443]' : ''}`}
@@ -71,7 +71,7 @@ const Incoming = ({Pending}) => {
             className={`px-4 cursor-pointer ${selectedItem === 'Standalone' ? 'border-b pb-[8px] text-[#E40443] border-[#E40443]' : ''}`}
             onClick={() => handleItemClick('Standalone')}
           >
-            Vaccination
+            Completed
           </li>
         </ul>
         <div className='float-right -mt-5 font-Montserrat text-[14px] font-semibold flex'><img src={arr} alt="" className='ml-2 mt-[2px] text-[#8D98A4] h-4 w-4'/></div>

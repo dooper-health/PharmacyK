@@ -356,7 +356,7 @@ const Kstep1 = () => {
         className="border border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer"
         onClick={() => handleUploadClick(field)}
       >
-        <span className="text-gray-500">{files[field] ? files[field].name : 'Upload'}</span>
+        <span className="block w-full truncate text-gray-500">{files[field] ? files[field].name : 'Upload'}</span>
         <input
           type="file"
           ref={fileInputRefs[field]}
